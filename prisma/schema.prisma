@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model FishType {
+  id          Int    @id @default(autoincrement())
+  name        String
+  coefficient Float  @default(1.0)
+  fishes      Fish[]
+}
+
+model Fish {
+  id           Int       @id @default(autoincrement())
+  weight       Int
+  image        String?
+  typeId       Int
+  teamId       Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now())
+  departureTime DateTime?
+  points       Int
+  boosted      Boolean   @default(false)
+  happyHour    Boolean   @default(false)
+  votes        Vote[]
+
+  type FishType @relation(fields: [typeId], references: [id])
+  team Team     @relation(fields: [teamId], references: [id])
+}
+
+model Team {
+  id    Int    @id @default(autoincrement())
+  name  String
+  users User[]
+  Fish  Fish[]
+  galleryPhotos GalleryPhoto[]
+  votingWins Int @default(0)
+  drinkEntries DrinkEntry[]
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  teamId   Int
+
+  team Team @relation(fields: [teamId], references: [id])
+  galleryPhotos GalleryPhoto[]
+  drinkEntries DrinkEntry[]
+}
+
+model GalleryPhoto {
+  id        Int      @id @default(autoincrement())
+  imageUrl  String
+  caption   String?
+  userId    Int
+  teamId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  team Team @relation(fields: [teamId], references: [id])
+}
+
+model Vote {
+  id        Int      @id @default(autoincrement())
+  fishId    Int
+  ipAddress String
+  createdAt DateTime @default(now())
+  votingDay DateTime @default(now()) @db.Date
+  
+  fish      Fish     @relation(fields: [fishId], references: [id])
+  
+  @@unique([ipAddress, votingDay])
+}
+
+model VotingResult {
+  id        Int      @id @default(autoincrement())
+  fishId    Int
+  teamId    Int
+  voteCount Int
+  votingDay DateTime @db.Date
+  processed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  @@unique([votingDay])
+}
+
+model DrinkEntry {
+  id        Int      @id @default(autoincrement())
+  count     Int      @default(1)
+  userId    Int
+  teamId    Int
+  createdAt DateTime @default(now())
+  date      DateTime @default(now()) @db.Date
+  
+  user User @relation(fields: [userId], references: [id])
+  team Team @relation(fields: [teamId], references: [id])
+}

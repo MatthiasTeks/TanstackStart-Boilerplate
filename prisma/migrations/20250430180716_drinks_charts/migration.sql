@@ -1,0 +1,17 @@
+-- CreateTable
+CREATE TABLE "DrinkEntry" (
+    "id" SERIAL NOT NULL,
+    "count" INTEGER NOT NULL DEFAULT 1,
+    "userId" INTEGER NOT NULL,
+    "teamId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "date" DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "DrinkEntry_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "DrinkEntry" ADD CONSTRAINT "DrinkEntry_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DrinkEntry" ADD CONSTRAINT "DrinkEntry_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
